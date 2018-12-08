@@ -1,5 +1,5 @@
-# Tabby
+# Monny
 This is a simple practice on Chrome Extension
-It enables sorting tabs of GoogleChrome on name and latests used frequency
-It also prevent duplicate webpages
+It can be used as a women period calculatar (not much math is used tho).
+It also sends notification when you're about to have your period coming.
 Enjoy:)
