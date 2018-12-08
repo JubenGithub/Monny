@@ -2,77 +2,63 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 chrome.runtime.onInstalled.addListener(function(){
-	let ctabs = [];
-	chrome.storage.sync.set({tabs:ctabs});
-});
-chrome.runtime.onStartup.addListener(function(){
-	chrome.tabs.query({currentWindow: true}, function (tabsf){
-		var tabs = tabsf;
-		chrome.storage.sync.get('tabs', function(data){
-			var ctabs = data.tabs;
-			for(var i in tabs){
-				if (!ctabs.includes(tabs[i].id)){
-					ctabs.push(tabs[i].id);
-				}
-			}
-			chrome.storage.sync.set({tabs:ctabs});
-		})
-
-	});
-    chrome.storage.sync.set({AvoidDupli: 'Off'});
+	var mcDates = [];
+	//----------for initialize------
+	var d1 = new Date(2018, 11, 04);
+	var d2 = new Date(2018, 9, 31);
+	let ds1 = d1.toLocaleDateString();
+	let ds2 = d2.toLocaleDateString();
+	//dates from new to old
+	mcDates.push(ds1);
+	mcDates.push(ds2);
+	chrome.storage.sync.set({dates:mcDates});
+	chrome.storage.sync.set({nextDate:'01/05/2019'});
+	console.log(mcDates);
+	//-------------initialize done------
 });
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
-	chrome.storage.sync.get('AvoidDupli', function(data) {
-		if(data.AvoidDupli == "On"){
-			var url = changeInfo.url;
-			var activeId = tabId;
-			if (url){
-				chrome.tabs.query({currentWindow: true, active:false}, function (tabs){
-					for (var i = 0; i < tabs.length; i++){
-						if (tabs[i].url == url && tabs[i].id != activeId){
-							console.log(tabs[i].id);
-							chrome.tabs.move(activeId, {index:i+1});
-							chrome.tabs.remove(tabs[i].id);
-						} 
-				}
-				});
-			}
-		}
-	})
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+for (key in changes) {
+  var storageChange = changes[key];
+  console.log('Storage key "%s" in namespace "%s" changed. ' +
+              'Old value was "%s", new value is "%s".',
+              key,
+              namespace,
+              storageChange.oldValue,
+              storageChange.newValue);
+  if(key=="dates"){//if dates got changed, change next date too
+	let Date1 = new Date(storageChange.newValue[0]);
+	let Date2 = new Date(storageChange.newValue[1]);
+	let timeDif = Date1-Date2;
+	let resultnDate = new Date(Date1.setMilliseconds(0+timeDif));
+	chrome.storage.sync.set({nextDate:resultnDate.toLocaleDateString()});
+	console.log(resultnDate);
+  }
+  if(key == "nextDate"){//if next date changed
+  	chrome.alarms.clear('comingWarning', function(isCleared){
+  		if(isCleared){
+  			console.log("old warning is cleared");
+  		}
+  	});
+  	chrome.alarms.create('comingWarning', {when: new Date(storageChange.newValue)-172800000})//alarm in 2 days before start date
+  	chrome.alarms.get('comingWarning', function(alarm){
+  		console.log('alarm set');
+  		let t = new Date(alarm.scheduledTime);
+  		console.log(t.toLocaleDateString());
+  	});
+  }
+}
 });
-chrome.tabs.onCreated.addListener(function(tab){
-	chrome.storage.sync.get('tabs', function(data){
-		var ctabs = data.tabs;
-		ctabs.push(tab.id);
-		chrome.storage.sync.set({tabs:ctabs});
-	});
+chrome.alarms.onAlarm.addListener(function(alarm){
+	if(alarm.name == 'comingWarning'){
+		chrome.browserAction.setIcon({path: 'images/comming32.png'});
+		chrome.notifications.create('test1', 
+		 	{type : "basic",
+	    	title : "Warning",
+	    	message: "Test For comming",
+	    	iconUrl: "images/comming32.png",
+	    	requireInteraction: true},function(){
+	    		console.log('notification created');
+	    	} );
+	}
 });
-chrome.tabs.onRemoved.addListener(function (tabId, removeInfo){
-	var ctabs = [];
-	chrome.storage.sync.get('tabs', function(data){
-		ctabs = data.tabs;
-		if(ctabs.includes(tabId)){
-			ctabs.splice(ctabs.indexOf(tabId), 1);
-		}
-		chrome.storage.sync.set({tabs:ctabs});
-	});
-})
-
-chrome.tabs.onActivated.addListener(function(activeInfo){
-	var ctabs = [];
-	chrome.storage.sync.get('tabs', function(data){
-		ctabs = data.tabs;
-		if (ctabs.includes(activeInfo.tabId)){
-			ctabs.splice(ctabs.indexOf(activeInfo.tabId), 1);
-			ctabs.push(activeInfo.tabId);
-		}
-		else{
-			ctabs.push(activeInfo.tabId);
-		}
-		chrome.storage.sync.set({tabs:ctabs});
-	});
-
-})
-
-

@@ -1,9 +1,9 @@
  {
-    "name": "My Simple Tab Manager",
+    "name": "My MC Calendar",
     "version": "1.0",
-    "description": "Enables Sorting tab by LRU and names, reduce duplicate webpages",
+    "description": "Little calendar for MC recording",
 	"options_page": "options.html",
-    "permissions": ["activeTab","declarativeContent", "storage", "tabs"],
+    "permissions": ["declarativeContent", "storage", "alarms","notifications"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false

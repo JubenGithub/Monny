@@ -1,68 +1,49 @@
-let sortname = document.getElementById('name');
-let sortfrequency = document.getElementById('frequency');
-let onoffswitch = document.getElementById('onoff');
-let search = document.getElementById('searchbutton');
-
-search.onclick = function(element){
-	let searchvalue = document.getElementById('searchvalue').value;
-	var searched = -1;
-	if(searchvalue){
-	chrome.tabs.query({currentWindow: true}, function (tabs){
-		for (i in tabs){
-			if(tabs[i].title.toLowerCase().includes(searchvalue.toLowerCase()) || tabs[i].url.toLowerCase().includes(searchvalue.toLowerCase())){
-				chrome.tabs.move(tabs[i].id, {index:-1});
-				searched = tabs[i];
+let addDatediv = document.getElementById('addDate');
+let pDatediv = document.getElementById('pDate');
+let nDatediv = document.getElementById('nDate');
+window.onload = function(){
+	chrome.storage.sync.get(['dates', 'nextDate'], function(data) {
+		if(data.dates.length > 0){
+			console.log(data.dates[0]); 
+			pDatediv.innerHTML = data.dates[0];
+		}
+		if(data.dates.length>1)//if more previous dates for sampling
+		{
+			if(data.nextDate){
+				console.log('next date exist '+data.nextDate);
+				nDatediv.innerHTML = data.nextDate;
 			}
 		}
-		if(searched != -1){
-			chrome.tabs.update(searched.id, {active: true});
-		}
-		
+
 	});
-	}
+}
+addDate.onclick = function(element){
+	chrome.browserAction.setIcon({path: 'images/get_started32.png'});
+    chrome.storage.sync.get('dates', function(data){
+    	console.log('add dates');
+    	let cDate = new Date();
+    	cDate.setMilliseconds(0);
+    	cDate.setSeconds(0)
+    	cDate.setHours(0);
+    	cDate.setMinutes(0);
+    	if(data.dates.length>0){
+    		console.log(data.dates[0]);
+    		let pDate = new Date(data.dates[0]);
+    		if(cDate.getTime() != pDate.getTime()){
+    			data.dates.unshift(cDate.toLocaleDateString());
+    			console.log('add data '+ cDate);
+    			while (data.dates.length>15){
+    				data.dates.pop();
+    			}
+    			chrome.storage.sync.set({dates:data.dates});
+    		}
+    	}
+    	else{//no initial date
+    		var dateArray = [];
+    		dateArray.push(cDate.toLocaleDateString());
+    		chrome.storage.sync.set({dates:dateArray});
+    	}
+    });
+	location.reload();
 }
 
-window.onload = function(){
-	chrome.storage.sync.get('AvoidDupli', function(data) {
-		if (data.AvoidDupli === 'On'){
-			onoffswitch.checked = true;
-		}
-		else{
-			onoffswitch.checked = false;
-		}
-		}
-	);
-}
-
-onoffswitch.onclick = function(element){
-	if (onoffswitch.checked == true){
-        chrome.storage.sync.set({AvoidDupli: 'On'});
-		
-	}
-	else{
-        chrome.storage.sync.set({AvoidDupli: 'Off'});
-	}
-}
-sortname.onclick = function(element){
-	chrome.tabs.query({currentWindow: true}, function (tabs){
-		console.log(tabs);
-		var sortarray = [];
-		for (var i = 0; i < tabs.length; i++ ){
-			sortarray.push([tabs[i].id, tabs[i].url]);
-		}
-		sortarray.sort(function(a, b){return a[1].localeCompare(b[1])});
-		console.log(sortarray);
-		for(var i in sortarray){
-			chrome.tabs.move(sortarray[i][0], {index:-1});
-		}
-	});
-};
-sortfrequency.onclick = function(element){
-	chrome.storage.sync.get('tabs', function(data){
-		let farray = data.tabs;
-		console.log(farray);
-		for(var i in farray){
-			chrome.tabs.move(farray[i], {index:-1});
-		}
-	});
-};

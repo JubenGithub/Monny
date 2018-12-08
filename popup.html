@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   	<head>
     	<style>
       	button {
@@ -101,25 +101,20 @@
     	</style>
   	</head>
 	<body style="height: 80px; width: 120px;">
-		Sort tab by
-			<li>
-			<button id='name'>name</button>
-		</li>
-		<li>
-			<button id='frequency'>LRU</button>
-		</li>
-		<div style = "margin-top:5px; margin-bottom:5px">
-		No Duplicate tab
-		
-		<label class="switch">
- 			   <input type="checkbox" id='onoff'>
- 			  <span class="slider round"></span>
-		  </label>
-	  </div>
-		<form class="example">
-  		  	<input type="text" placeholder="Search.." id='searchvalue'>
-  			<button type="submit" id='searchbutton'><i class="fa fa-search"></i></button>
-		</form>		
+		<div id="time_information">
+			上次日期
+			<div id="pDate">
+			</div>
+			下次日期
+			<div id="nDate">
+			</div>
+			<div id="addDateBtn">
+				<button id="addDate" style="background-color: red; color:white;">添加本日</button>
+			</div>
+			<div id = "exLinkToRecords">
+				<a href="/MCRecords.html" target="_blank">檢閱過去紀錄</a>
+			</div>
+		</div>
 		<script src="popup.js"></script>
   	</body>
 </html>
