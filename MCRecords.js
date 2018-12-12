@@ -1,5 +1,6 @@
 
 let list = document.getElementById('dateList');
+let submitbtn = document.getElementById('submitbtn');
 let sortbtn = document.getElementById('sortbtn');
 window.onload = function(){
   chrome.storage.sync.get('dates', function(data){
@@ -24,14 +25,22 @@ window.onload = function(){
 
   });
 }
-sortbtn.onclick = function(){
-  chrome.storage.sync.get('dates', function(data){
-    data.dates.sort(function(a, b){
-      return new Date(b) - new Date(a);
-    });
-    chrome.storage.sync.set({dates:data.dates});
+submitbtn.onclick = function(){
+  let datevalue = document.getElementById('pday');
+  if(datevalue.value){
+    console.log(datevalue.value);
+    //due to new Date from datevalue would subtract i day for somehow
+    let newDate = new Date(datevalue.value);
+    newDate.setDate(newDate.getDate()+1);
+    chrome.storage.sync.get('dates', function(data){
+      data.dates.push(newDate.toLocaleDateString());
+      data.dates.sort(function(a, b){
+        return new Date(b) - new Date(a);
+      });
+      chrome.storage.sync.set({dates:data.dates});
     location.reload();
-  });
+    });
+  }
 }
 function deleteDate(i){
   chrome.storage.sync.get('dates', function(data){

@@ -26,7 +26,7 @@ for (key in changes) {
               namespace,
               storageChange.oldValue,
               storageChange.newValue);
-  if(key=="dates"){//if dates got changed, change next date too
+  if(key=="dates" ){//if dates got changed, change next date too
 	let Date1 = new Date(storageChange.newValue[0]);
 	let Date2 = new Date(storageChange.newValue[1]);
 	let timeDif = Date1-Date2;
@@ -34,7 +34,7 @@ for (key in changes) {
 	chrome.storage.sync.set({nextDate:resultnDate.toLocaleDateString()});
 	console.log(resultnDate);
   }
-  if(key == "nextDate"){//if next date changed
+  if(key == "nextDate"&& storageChange.newValue != null){//if next date changed
   	chrome.alarms.clear('comingWarning', function(isCleared){
   		if(isCleared){
   			console.log("old warning is cleared");
